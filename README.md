@@ -1,97 +1,196 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# React Native Performance Benchmark
 
-# Getting Started
+A cross-platform performance benchmarking tool for React Native applications. Measures app startup time and UI stability using platform-native SDKs.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 🎯 Purpose
 
-## Step 1: Start Metro
+This project benchmarks React Native app performance by measuring:
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- **UI stability time** (when animations become stable)
+- **App launch to scene stability duration**
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Results are provided by platform-specific SDKs:
 
-```sh
-# Using npm
-npm start
+- **iOS**: Uses PixelSamplerSDK
+- **Android**: Uses PixelSamplerSDK
 
-# OR using Yarn
-yarn start
+## ⚠️ Disclaimer
+
+This SDK has been tested on the following devices only:
+
+| Platform | Device/OS |
+|----------|-----------|
+| **Android** | Redmi Note 8 Pro (Android 10/Q) |
+| **iOS** | iPhone 15 (iOS 26+) |
+
+**Important Notes:**
+
+- Results may vary across different devices, Android/iOS versions, and system configurations
+- The benchmark numbers provided are for reference only and not guaranteed to be reproducible on all devices
+- Build and test scripts assume a Unix-like environment (macOS/Linux)
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+#### For iOS Development
+
+- macOS with Xcode 14.0+
+- iOS 16.0+ device or simulator
+- CocoaPods (installed via Ruby bundler)
+
+#### For Android Development
+
+- macOS / Linux / Windows
+- Android Studio or command line tools
+- Android SDK (API 29+)
+- Java 17
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/timionius/RNBenchmark.git
+cd RNBenchmark
 ```
 
-## Step 2: Build and run your app
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## 📱 Android Benchmarking
 
-### Android
+### Build and Run
 
-```sh
-# Using npm
-npm run android
+```bash
+# Install JavaScript dependencies
+npm install
 
-# OR using Yarn
-yarn android
+# Bundle the JavaScript
+npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
+
+# Navigate to Android project
+cd android
+
+# Build release APK
+./gradlew assembleRelease
+
+# Install with permissions (automatically grants screen capture permission)
+adb install -r -g ./app/build/outputs/apk/release/app-release.apk
+
+# Grant MediaProjection permission (bypasses dialog)
+adb shell cmd appops set com.rnbenchmark PROJECT_MEDIA allow
+
+# Launch the app
+adb shell am start -n com.rnbenchmark/.MainActivity
 ```
 
-### iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+### View Results
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+Monitor Logcat for benchmark output:
 
-```sh
+```bash
+adb logcat | grep -E "BENCHMARK"
+```
+
+
+Monitor Logcat for PixelSamplerSDK pipeline output:
+
+```bash
+adb logcat -s "PixelSampler:*"
+```
+
+
+Expected output:
+
+```text
+05-09 12:51:58.588 18309 18309 I PixelSampler: ✅ [BENCHMARK] APP_START: 0,076ms
+05-09 12:51:58.689 18309 18309 I PixelSampler: ✅ [BENCHMARK] FRAMEWORK_ENTRY: 101,811ms
+05-09 12:52:00.019 18309 18309 I PixelSampler: ✅ [BENCHMARK] Total time: 1381,080ms
+```
+
+
+## 📱 iOS Benchmarking
+
+### Run in Xcode
+
+First, install CocoaPods dependencies (only needed once per clone or after native updates):
+
+```bash
+# Install bundler and CocoaPods if not already done
 bundle install
-```
 
-Then, and every time you update your native dependencies, run:
-
-```sh
+# Install pod dependencies
 bundle exec pod install
+
+# Bundle the JavaScript
+npx react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
 
-```sh
-# Using npm
-npm run ios
+Then open the Xcode workspace:
 
-# OR using Yarn
-yarn ios
+```bash
+open ios/RNBenchmark.xcworkspace
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+In Xcode:
 
-## Step 3: Modify your app
+1. Select your target device or simulator
+2. Press `Cmd + R` to run
+3. View benchmark results in the Xcode console
 
-Now that you have successfully run the app, let's make changes!
+### View Results
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+iOS benchmark results appear in Xcode console:
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+```text
+🚀 [BENCHMARK] APP_START: 0.000ms
+✅ [BENCHMARK] Total time: 1219.8ms
+```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
 
-## Congratulations! :tada:
+## 📊 Understanding Results
 
-You've successfully run and modified your React Native App. :partying_face:
+| Metric | Description | Target |
+|--------|-------------|--------|
+| **APP_START** | Time from app launch to SDK initialization (base) | 0ms |
+| **FRAMEWORK_ENTRY** (Android only) | Time when framework entrypoint is accessible | <200ms |
+| **Total time** | Complete benchmark duration | Varies by device |
 
-### Now what?
+## 🏗️ Native Integration Notes
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+This project uses the **PixelSamplerSDK** natively on each platform:
 
-# Troubleshooting
+### Android (Kotlin)
+- SDK integrated into Android via importing from jitpack
+- Permission handling: `PROJECT_MEDIA` granted via adb command
+- Results logged to Logcat with `PixelSampler` tag
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+### iOS (Swift)
+- SDK integrated into iOS using SPM package
+- Results appear in Xcode console
 
-# Learn More
+## 📄 License
 
-To learn more about React Native, take a look at the following resources:
+```text
+MIT License
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Copyright (c) 2026 Dmitrii Nikishov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
