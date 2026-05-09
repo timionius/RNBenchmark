@@ -1,0 +1,15 @@
+{
+  "originHash" : "3b2bd7412a53d23bf39c1dfd9ac7ab21f13927ef9c69d9230c9208c047920605",
+  "pins" : [
+    {
+      "identity" : "ios-frameworks-benchmark",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/timionius/ios-frameworks-benchmark",
+      "state" : {
+        "branch" : "main",
+        "revision" : "1ef0d69e0c09729080a51a1e7967aa590cfd0ba2"
+      }
+    }
+  ],
+  "version" : 3
+}

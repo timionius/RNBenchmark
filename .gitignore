@@ -1,0 +1,44 @@
+# Node.js
+coverage/
+node_modules/
+vendor/
+npm-debug.log
+yarn-error.log
+yarn.lock
+
+# Android
+**/.cxx/
+build/
+.gradle
+local.properties
+*.iml
+*.keystore
+.idea
+android/app/src/main/assets/index.android.bundle
+./android/app/src/main/assets/fonts/icons.ttf
+
+# iOS
+ios/build/
+ios/Pods/
+ios/DerivedData/
+ios/Podfile.lock
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+project.xcworkspace/userdata/
+xcuserdata/
+
+# OS X
+.DS_Store
+
+# Fastlane (if used)
+fastlane/report.xml
+fastlane/screenshots
+fastlane/test_output
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
