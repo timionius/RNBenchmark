@@ -9,7 +9,11 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import io.timon.android.pixelsampler.PixelSampler
 
 class MainApplication : Application(), ReactApplication {
-
+  companion object {
+    init {
+      PixelSampler.init()
+    }
+  }
   override val reactHost: ReactHost by lazy {
     getDefaultReactHost(
       context = applicationContext,
@@ -23,7 +27,6 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
-    PixelSampler.init()
     loadReactNative(this)
   }
 }
